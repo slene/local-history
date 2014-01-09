@@ -86,9 +86,8 @@ class HistorySave(sublime_plugin.EventListener):
             os.makedirs(history_dir)
 
         # Get history files
-        os.chdir(history_dir)
         history_files = glob.glob("*" + file_name)
-        history_files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
+        history_files.sort(key=lambda f: os.path.getmtime(os.path.join(history_dir, f)), reverse=True)
 
         # Skip if no changes
         if history_files:
@@ -103,6 +102,7 @@ class HistorySave(sublime_plugin.EventListener):
         # Remove old files
         now = time.time()
         for file in history_files:
+            file = os.path.join(history_dir, file)
             if os.path.getmtime(file) < now - FILE_HISTORY_RETENTION:
                 os.remove(file)
 
@@ -127,13 +127,8 @@ class HistoryOpen(sublime_plugin.TextCommand):
         history_dir = get_file_dir(self.view.file_name())
 
         # Get history files
-        try:
-            os.chdir(history_dir)
-        except OSError:
-            sublime.status_message(NO_HISTORY_MSG)
-            return
         history_files = glob.glob("*" + file_name)
-        history_files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
+        history_files.sort(key=lambda f: os.path.getmtime(os.path.join(history_dir, f)), reverse=True)
         if not history_files:
             sublime.status_message(NO_HISTORY_MSG)
             return
@@ -157,9 +152,8 @@ class HistoryCompare(sublime_plugin.TextCommand):
         history_dir = get_file_dir(self.view.file_name())
 
         # Get history files
-        os.chdir(history_dir)
         history_files = glob.glob("*" + file_name)
-        history_files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
+        history_files.sort(key=lambda f: os.path.getmtime(os.path.join(history_dir, f)), reverse=True)
         # Skip the first one as its always identical
         history_files = history_files[1:]
 
@@ -192,9 +186,8 @@ class HistoryReplace(sublime_plugin.TextCommand):
         history_dir = get_file_dir(self.view.file_name())
 
         # Get history files
-        os.chdir(history_dir)
         history_files = glob.glob("*" + file_name)
-        history_files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
+        history_files.sort(key=lambda f: os.path.getmtime(os.path.join(history_dir, f)), reverse=True)
         # Skip the first one as its always identical
         history_files = history_files[1:]
 
@@ -227,9 +220,8 @@ class HistoryIncrementalDiff(sublime_plugin.TextCommand):
         history_dir = get_file_dir(self.view.file_name())
 
         # Get history files
-        os.chdir(history_dir)
         history_files = glob.glob("*" + file_name)
-        history_files.sort(key=lambda f: os.path.getmtime(f), reverse=True)
+        history_files.sort(key=lambda f: os.path.getmtime(os.path.join(history_dir, f)), reverse=True)
         if len(history_files) < 2:
             sublime.status_message(NO_INCREMENTAL_DIFF)
             return
